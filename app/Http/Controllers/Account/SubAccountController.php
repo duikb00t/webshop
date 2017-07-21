@@ -1,35 +1,51 @@
 <?php
 
-namespace App\Http\Controllers\Account;
+namespace WTG\Http\Controllers\Account;
 
-use Auth;
-use App\User;
-use Response;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+use Illuminate\Http\Response;
+use WTG\Http\Controllers\Controller;
+use WTG\Customer\Repositories\CustomerRepository;
 
 /**
  * Class SubAccountController.
+ *
  * @author  Thomas Wiringa <thomas.wiringa@gmail.com>
  */
 class SubAccountController extends Controller
 {
-    public function __construct()
+    /**
+     * @var CustomerRepository
+     */
+    protected $cr;
+
+    /**
+     * SubAccountController constructor.
+     *
+     * @param  CustomerRepository  $cr
+     */
+    public function __construct(CustomerRepository $cr)
     {
-        $this->middleware('manager');
+        $this->middleware('role:manager');
+
+        $this->cr = $cr;
     }
 
     /**
-     * Get the sub accounts.
+     * Main sub accounts page
      *
      * @return \Illuminate\View\View
      */
-    public function index()
+    public function getAction()
     {
-        return view('account.sub_accounts', [
-            'accounts' => Auth::user()->subAccounts(),
-        ]);
+        $accounts = $this->cr->findByCompany(
+            auth()->user()->getCompany()
+        );
+
+        return view('pages.account.sub-accounts', compact('accounts'));
     }
+
+    // TODO: Make the stuff below work
 
     /**
      * Store a newly created resource in storage.

@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Account;
+namespace WTG\Http\Controllers\Account;
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+use WTG\Http\Controllers\Controller;
 
 /**
- * Class PasswordController.
+ * Password controller.
+ *
  * @author  Thomas Wiringa <thomas.wiringa@gmail.com>
  */
 class PasswordController extends Controller
@@ -16,9 +17,9 @@ class PasswordController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function getChangePassword()
+    public function getAction()
     {
-        return view('account.changePass');
+        return view('pages.account.change-password');
     }
 
     /**
@@ -27,38 +28,40 @@ class PasswordController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function doChangePassword(Request $request)
+    public function postAction(Request $request)
     {
         $validator = \Validator::make($request->all(), [
             'password_old' => 'required',
             'password'     => 'required|confirmed',
         ]);
 
+        $user = \Auth::user();
+
         $user_details = [
-            'username'   => \Auth::user()->username,
-            'company_id' => \Auth::user()->company_id,
+            'username'   => $user->getUsername(),
+            'company_id' => $user->getCompanyId(),
             'password'   => $request->input('password_old'),
         ];
 
         if ($validator->passes()) {
             if (\Auth::validate($user_details)) {
-                $user = \Auth::user();
-                $user->password = bcrypt($request->input('password'));
+                $user->setPassword(bcrypt($request->input('password')));
                 $user->save();
 
-                \Log::info("User with id '".$user->id."' changed their password.");
+                \Log::info("[Password change] User with id '{$user->getId()}' changed their password.");
 
-                return redirect('account')
+                return redirect()
+                    ->back()
                     ->with('status', 'Uw wachtwoord is gewijzigd');
             } else {
-                \Log::warning("User with id '".\Auth::user()->id."' failed to change their password. Reason: Old password did not match");
+                \Log::warning("[Password change] User with id '{$user->getId()}' failed to change their password. Reason: Credential validation failed");
 
                 return redirect()
                     ->back()
                     ->withErrors('Het oude wachtwoord en uw huidige wachtwoord komen niet overeen.');
             }
         } else {
-            \Log::warning("User with id '".\Auth::user()->id."' failed to change their password. Reason: ".$validator->errors());
+            \Log::warning("[Password change] User with id '{$user->getId()}' failed to change their password. Reason: ".$validator->errors());
 
             return redirect()
                 ->back()
