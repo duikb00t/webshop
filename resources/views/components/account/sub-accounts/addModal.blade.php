@@ -1,12 +1,13 @@
-<div class="modal fade" id="addAccountDialog" tabindex="-1" role="dialog" aria-labelledby="addAccount" aria-hidden="true">
+<div class="modal fade" id="addAccountDialog" tabindex="-1" role="dialog" aria-labelledby="addAccount">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form class="form-horizontal" method="POST" role="form">
+            <form class="form-horizontal" method="POST">
 
                 {{ csrf_field() }}
+                {{ method_field('put') }}
 
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
                     <h4 class="modal-title">Sub account toevoegen</h4>
                 </div>
 
@@ -14,7 +15,7 @@
                     <div class="form-group">
                         <label for="username" class="col-sm-3 hidden-xs control-label">Gebruikersnaam*</label>
                         <div class="col-xs-12 col-sm-9">
-                            <input type="text" name="username" class="form-control" placeholder="Gebruikersnaam" maxlength="100" required>
+                            <input name="username" class="form-control" placeholder="Gebruikersnaam" maxlength="100" required>
                         </div>
                     </div>
 
@@ -64,7 +65,7 @@
 
                     <br class="visible-xs" />
 
-                    <button type="submit" class="btn btn-primary">Account aanmaken</button>
+                    <button class="btn btn-primary">Account aanmaken</button>
                 </div>
             </form>
         </div>

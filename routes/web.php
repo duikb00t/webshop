@@ -33,15 +33,16 @@ Route::group([
     Route::get('/', 'DashboardController@getAction')->name('dashboard');
     Route::get('accounts', 'SubAccountController@getAction')->name('sub_accounts');
     Route::get('password', 'PasswordController@getAction')->name('change_password');
+    Route::get('favorites', 'FavoritesController@getAction')->name('favorites');
 
     Route::post('password', 'PasswordController@postAction');
+
+    Route::put('accounts', 'SubAccountController@putAction');
 
     Route::group([
         'prefix' => 'accounts',
         'as' => 'accounts.'
     ], function () {
-
-
         Route::post('/', 'SubAccountController@store');
         Route::post('update/{id}', 'SubAccountController@update')->name('update');
         Route::post('remove', 'SubAccountController@destroy')->name('delete');
@@ -51,8 +52,6 @@ Route::group([
         'prefix' => 'favorites',
         'as' => 'favorites::'
     ], function () {
-        Route::get('/', 'FavoritesController@view')->name('view');
-
         Route::post('check', 'FavoritesController@check')->name('check');
         Route::post('add', 'FavoritesController@add')->name('add');
         Route::post('delete', 'FavoritesController@delete')->name('delete');

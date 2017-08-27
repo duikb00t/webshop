@@ -5,7 +5,6 @@ namespace WTG\Http\Controllers\Account;
 use Illuminate\Support\Facades\Auth;
 use WTG\Catalog\Interfaces\ProductInterface;
 use WTG\Customer\Requests\AddFavoriteRequest;
-use WTG\Customer\Interfaces\FavoriteInterface;
 use WTG\Customer\Requests\CheckFavoriteRequest;
 use WTG\Customer\Requests\DeleteFavoriteRequest;
 
@@ -23,7 +22,7 @@ class FavoritesController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function view()
+    public function getAction()
     {
         $favorites = [];
 

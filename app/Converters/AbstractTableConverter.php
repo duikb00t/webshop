@@ -177,12 +177,6 @@ abstract class AbstractTableConverter implements TableConverter
      */
     public function mapCsvFields(array $data)
     {
-        foreach ($data as $index => $value) {
-            $data[$this->csvFields[$index]] = $value;
-
-            unset($data[$index]);
-        }
-
-        return $data;
+        return array_combine($this->csvFields, $data);
     }
 }

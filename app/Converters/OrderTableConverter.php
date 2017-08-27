@@ -2,39 +2,82 @@
 
 namespace WTG\Converters;
 
-use Doctrine\ORM\EntityRepository;
 
+use Carbon\Carbon;
+use WTG\Checkout\Entities\Order;
+use WTG\Checkout\Entities\OrderItem;
+use Doctrine\ORM\EntityManagerInterface;
+use WTG\Customer\Repositories\CompanyRepository;
+
+/**
+ * Order table converter.
+ *
+ * @author  Thomas Wiringa  <thomas.wiringa@gmail.com>
+ */
 class OrderTableConverter extends AbstractTableConverter implements TableConverter
 {
-    public function getColumns(): array
-    {
-        // TODO: Implement getColumnMap() method.
-    }
+    /**
+     * @var CompanyRepository
+     */
+    protected $cr;
 
-    public function getEntity(): string
-    {
-        // TODO: Implement getEntity() method.
-    }
+    /**
+     * @var array
+     */
+    protected $csvFields = [
+        'id',
+        'products',
+        'User_id',
+        'created_at',
+        'updated_at',
+        'comment',
+        'addressId'
+    ];
 
-    public function createEntity(array $data)
+    /**
+     * CustomerTableConverter constructor.
+     *
+     * @param  EntityManagerInterface  $em
+     * @param  CompanyRepository  $cr
+     */
+    public function __construct(EntityManagerInterface $em, CompanyRepository $cr)
     {
-        // TODO: Implement createEntity() method.
+        parent::__construct($em);
+
+        $this->cr = $cr;
     }
 
     /**
-     * Map the csv fields.
+     * Create the order with the order_items.
      *
      * @param  array  $data
-     * @return array
+     * @return Order
      */
-    public function mapCsvFields(array $data)
+    public function createEntity(array $data)
     {
-        foreach ($data as $index => $value) {
-            $data[$this->csvFields[$index]] = $value;
+        $company = $this->cr->findByCustomerNumber($data['User_id']);
 
-            unset($data[$index]);
+        $order = new Order(
+            $company,
+            $data['comment'] ?: null,
+            Carbon::parse($data['created_at'])
+        );
+
+        $items = unserialize($data['products']);
+
+        foreach ($items as $item) {
+            dump($item);
+            $orderItem = new OrderItem(
+                $order,
+                $item['id'],
+                $item['price'] ?? 0.00,
+                $item['qty'],
+                $item['subtotal'] ?? 0.00
+            );
+
+            $this->em->persist($orderItem);
         }
-        dd($data);
-        return $data;
+
+        return $order;
     }
 }

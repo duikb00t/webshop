@@ -4,11 +4,13 @@ namespace WTG\Http\Controllers\Account;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Doctrine\ORM\EntityManager;
+use WTG\Customer\Entities\Customer;
 use WTG\Http\Controllers\Controller;
 use WTG\Customer\Repositories\CustomerRepository;
 
 /**
- * Class SubAccountController.
+ * Sub account controller.
  *
  * @author  Thomas Wiringa <thomas.wiringa@gmail.com>
  */
@@ -43,6 +45,52 @@ class SubAccountController extends Controller
         );
 
         return view('pages.account.sub-accounts', compact('accounts'));
+    }
+
+    /**
+     * Add a new account.
+     *
+     * @param  Request  $request
+     * @param  EntityManager  $em
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function putAction(Request $request, EntityManager $em)
+    {
+        $validator = validator($request->all(), [
+            'username' => 'required',
+            'password' => 'required|confirmed',
+            'email'    => 'required|email',
+            'role'     => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return back()
+                ->withInput($request->except('password'))
+                ->withErrors($validator->failed());
+        }
+
+        if (! auth()->hasRole($request->input('role'))) {
+            return back()
+                ->withInput($request->except('password'))
+                ->withErrors(__("You do not have the required role to give this account the {$request->input('role')} role."));
+        }
+
+        $company = $request->user()->getCompany();
+
+        $customer = new Customer(
+            $company,
+            $request->input('username'),
+            bcrypt($request->input('password')),
+            $request->input('email'),
+            $request->input('role'),
+            true
+        );
+
+        $em->persist($customer);
+        $em->flush();
+
+        return back()
+            ->with('status', trans('The account has been created'));
     }
 
     // TODO: Make the stuff below work
